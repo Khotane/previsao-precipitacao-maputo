@@ -1,0 +1,954 @@
+\documentclass[9pt,twocolumn,twoside,english,portuguese]{opticajnl}
+\journal{opticajournal}
+
+\usepackage{ragged2e}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{amsmath, amssymb}
+\usepackage{mathtools}
+\usepackage{xcolor}
+
+\doi{}
+
+\title{Previsão da Precipitação e Classificação do Risco Pluviométrico na Província de Maputo: SARIMAX, Random Forest e XGBoost}
+
+\author[1,*]{Gaio Cotane Joao Magaia}
+
+\affil[1]{DARTA'ACOS, Consultoria e Estatística, Maputo, Moçambique}
+\affil[*]{Autor correspondente: cotanegayo@gmail.com; dea.dartacos@outlook.com}
+
+\date{}
+
+\begin{abstract}
+\footnotesize
+
+\noindent\textbf{Resumo.} Previsões de curto prazo da precipitação são essenciais para o
+planeamento agrícola, a drenagem urbana e a preparação para emergências
+em Moçambique, onde a rede meteorológica é limitada. Este estudo
+comparou os modelos SARIMAX e Random Forest na previsão da precipitação
+do dia seguinte e na classificação do risco pluviométrico na Província
+de Maputo, com dados ERA5 de 1995 a 2024 (10.957 observações diárias).
+A metodologia incluiu análise exploratória, testes de Mann--Kendall,
+Dickey--Fuller e STL, e 21 preditores (calendário, defasagens,
+acumulados e médias móveis). O teste de Mann--Kendall indicou tendência
+decrescente fraca mas significativa na precipitação diária
+($p=0{,}0104$), sem tendências nos agregados anuais e sazonais. Os
+dados foram divididos cronologicamente, evitando o vazamento de
+informação. O SARIMAX(1,0,1) foi identificado por ACF/PACF; o Random
+Forest foi optimizado por validação cruzada temporal. Os resultados
+evidenciaram sazonalidade marcada, com 59,72\% de dias sem chuva e
+máximo diário de 125,3~mm. O Random Forest optimizado superou o SARIMAX
+no teste (MAE 2,3569~mm, RMSE 5,6975~mm, $R^2=0{,}1567$), revelando
+relações não lineares. A precipitação do dia actual foi a variável mais
+importante, seguida da pressão média e da precipitação acumulada em
+sete dias. Na classificação do risco, o XGBoost obteve os melhores
+resultados (acurácia balanceada 0,3159, F1-score macro 0,3097), embora
+nenhum modelo identificasse os eventos de chuva extrema. Conclui-se que
+o Random Forest optimizado é o mais adequado para prever o volume
+diário de precipitação e o XGBoost para classificar o risco; ambos devem
+apoiar a decisão com observações locais e previsões oficiais, não como
+sistemas autónomos de alerta.
+
+\smallskip
+\noindent\textbf{Palavras-chave:} Precipitação; Random Forest; SARIMAX; XGBoost; Maputo.
+
+\smallskip
+\noindent\rule{\linewidth}{0.3pt}
+\smallskip
+
+\noindent\foreignlanguage{english}{\textbf{Abstract.} Short-term rainfall forecasts are essential for agricultural planning,
+urban drainage, and emergency preparedness in Mozambique, where the
+meteorological observation network is limited. This study compared
+SARIMAX and Random Forest models in forecasting next-day precipitation
+and classifying rainfall risk in Maputo Province, using ERA5 reanalysis
+data from 1995 to 2024 (10,957 daily observations). The methodology
+included exploratory analysis, Mann--Kendall, Dickey--Fuller and STL
+tests, and 21 predictors (calendar, lags, accumulations, and moving
+averages). The Mann--Kendall test indicated a weak but significant
+decreasing trend in daily precipitation ($p=0.0104$), with no
+significant trends in annual and seasonal aggregates. Data were split
+chronologically to prevent information leakage. SARIMAX(1,0,1) was
+identified through ACF/PACF; Random Forest was optimized by temporal
+cross-validation. Results showed marked seasonality, with 59.72\% of
+rain-free days and a daily maximum of 125.3~mm. The optimized Random
+Forest outperformed SARIMAX on the test set (MAE 2.3569~mm, RMSE
+5.6975~mm, $R^2=0.1567$), revealing nonlinear relationships. Same-day
+precipitation was the most important variable, followed by mean pressure
+and seven-day accumulated precipitation. For risk classification,
+XGBoost achieved the best results (balanced accuracy 0.3159, macro
+F1-score 0.3097), although no model identified extreme rainfall events.
+The optimized Random Forest is the most suitable for forecasting daily
+precipitation volume and XGBoost for risk classification; both should
+support decision-making with local observations and official forecasts,
+rather than act as standalone alert systems.}
+
+\smallskip
+\noindent\textbf{Keywords:} Rainfall; Random Forest; SARIMAX; XGBoost; Maputo.
+\end{abstract}
+\setboolean{displaycopyright}{false}
+\begin{document}
+\vspace{-2.5 em}
+\maketitle
+
+\section{Introduction}
+\subsection{Contextualização do estudo}
+
+A chuva aplica influência directa sobre a agricultura, a drenagem
+urbana, os transportes, as obras e outras actividades económicas na Província
+de Maputo. A sua distribuição alternada, marcada pela alternância entre uma
+época chuvosa e uma época seca, pode dificultar o planeamento quando as
+decisões dependem da ocorrência ou da intensidade da chuva no dia seguinte.
+Esta situação torna a previsão de curto prazo relevante para apoiar a
+preparação de actividades e a redução de riscos associados a episódios de
+precipitação intensa.
+
+O uso de dados meteorológicos observados é importante para representar
+as condições locais. Contudo, a disponibilidade e a continuidade das séries diárias de estações de superfície podem ser limitadas. Moçambique ainda
+enfrenta desafios relacionados com a cobertura, manutenção e disponibilidade
+da rede de observação meteorológica \cite{wmo_mozambique_2024}. Neste
+contexto, os dados ERA5 constituem uma alternativa útil, pois fornecem séries
+temporais contínuas de variáveis meteorológicas e são produzidos através da
+combinação de observações com um sistema de reanálise numérica
+\cite{hersbach2020era5}.
+
+Apesar dessa vantagem, o ERA5 não corresponde a uma medição directa realizada num ponto específico. Por isso, os seus valores de precipitação podem não
+representar completamente a variabilidade local, sobretudo durante eventos
+convectivos intensos. A utilização do ERA5 neste estudo deve, assim, ser
+entendida como uma abordagem de modelação para a área representada pelos
+dados, e não como substituição definitiva das observações pluviométricas
+locais. Sempre que possível, os resultados devem ser comparados com dados do INAM ou de estações próximas, como Maputo/Mavalane, e com produtos
+complementares de precipitação, como o CHIRPS \cite{funk2015chirps}.
+
+Do ponto de vista da tomada de decisão, a previsão do volume de precipitação
+e a classificação do risco respondem a necessidades distintas. A primeira
+indica a quantidade provável de chuva, enquanto a segunda transforma essa
+estimativa em categorias com interpretação mais simples para utilizadores não especializados. Neste estudo, foram adoptadas cinco categorias:
+sem chuva, chuva fraca, chuva moderada, chuva forte e chuva extrema. Estes
+limites foram utilizados como uma classificação operacional para a análise e
+não devem ser interpretados como um sistema oficial de alerta meteorológico.
+
+Embora SARIMAX e Random Forest sejam utilizados em estudos de previsão
+meteorológica, o seu desempenho pode variar conforme a região, a escala
+temporal, as variáveis disponíveis e a distribuição da precipitação. Assim,
+permanece relevante avaliar qual dos modelos oferece maior utilidade para
+prever a precipitação do dia seguinte na área estudada, bem como verificar
+quais variáveis contribuem mais para essa previsão. Este estudo compara os
+dois modelos com base em dados ERA5 de 1995 a 2024, avaliando simultaneamente
+a previsão do volume de precipitação, a classificação do risco pluviométrico
+com 24 horas de antecedência e a importância das variáveis meteorológicas.
+
+
+\subsection{Problema de pesquisa}
+
+Moçambique está vulnerável a cheias, ciclones e secas devido à sua localização costeira e às principais bacias hidrográficas. No sul, as bacias do Limpopo, Incomáti, Umbelúzi e Maputo aumentam a exposição a inundações
+\cite{muleia2024mozambique}. A Província de Maputo também enfrenta riscos associados à precipitação intensa e à sua localização costeira
+\cite{matos2023maputo}.
+
+A precipitação afecta a agricultura, a drenagem urbana, os transportes e a
+gestão de emergências. No período de 1995--2014, Moçambique registou uma
+precipitação média anual de 909,13~mm, com variações entre regiões
+\cite{worldbank_mozambique_climate}.
+
+A previsão diária continua difícil, pois a chuva varia no espaço e no tempo,
+e os eventos intensos podem ser localizados e de curta duração. A limitação
+da rede de observação meteorológica também dificulta a obtenção de séries
+locais contínuas \cite{wmo_mozambique_2024}.
+
+Neste contexto, o ERA5 fornece séries contínuas de precipitação e de outras
+variáveis meteorológicas. Contudo, por ser uma reanálise, não representa
+directamente uma estação específica e pode diferir das observações locais,
+sobretudo em eventos intensos \cite{hersbach2020era5}.
+
+O SARIMAX permite modelar a dependência temporal e incorporar variáveis
+exógenas, enquanto o Random Forest capta relações não lineares. Assim, esta pesquisa compara o desempenho dos dois modelos na previsão da precipitação do dia seguinte, com 24 horas de antecedência, na área representada pelos dados
+da Província de Maputo. Avalia também a classificação do risco pluviométrico
+e identifica as variáveis mais relevantes, utilizando dados ERA5 de 1995 a 2024.
+
+\subsection{Justificativa}
+A sua variabilidade e a
+ocorrência de eventos intensos dificultam o planeamento com antecedência,
+tornando relevante a previsão da chuva do dia seguinte para apoiar decisões
+operacionais.
+
+A disponibilidade limitada de séries meteorológicas locais contínuas reforça a utilidade dos dados ERA5, que permitem analisar um período extenso e
+incorporar diferentes variáveis meteorológicas. Contudo, por se tratar de dados de reanálise, é necessário avaliar o desempenho dos modelos na área de estudo e reconhecer as limitações da sua representação local
+\cite{hersbach2020era5,wmo_mozambique_2024}.
+
+A comparação entre SARIMAX e Random Forest justifica-se pelas diferenças entre os dois métodos. O SARIMAX representa a dependência temporal da precipitação,
+enquanto o Random Forest permite modelar relações não lineares entre as variáveis e as suas defasagens. A avaliação conjunta da previsão do volume, da classificação do risco pluviométrico e da importância das variáveis permite verificar qual abordagem oferece maior utilidade para o apoio à
+tomada de decisão.
+
+Assim, a pesquisa é justifica-se por produzir evidências específicas para a área
+representada pelos dados da Província de Maputo, utilizando o período de 1995
+a 2024. Os resultados poderão apoiar análises meteorológicas e decisões de
+curto prazo, sem substituir as previsões oficiais nem os sistemas de alerta
+das entidades competentes.
+
+\subsubsection{Objectivo geral}
+
+Analisar o desempenho dos modelos SARIMAX e Random Forest na previsão da precipitação do dia seguinte e identificar as variáveis que mais contribuem
+para essa previsão na Província de Maputo, utilizando dados ERA5 do período
+de 1995 a 2024.
+
+\subsubsection{Objectivos específicos}
+
+\begin{enumerate}
+    \item Comparar o desempenho dos modelos SARIMAX e Random Forest na
+    previsão da precipitação do dia seguinte;
+
+    \item Avaliar a capacidade dos modelos na classificação do risco
+    pluviométrico com 24 horas de antecedência;
+
+    \item Identificar as variáveis meteorológicas mais relevantes para a
+    previsão da precipitação.
+\end{enumerate}
+
+\section{Revisão da literatura}
+
+\subsection{Precipitação e variabilidade meteorológica em regiões tropicais}
+
+A precipitação em Moçambique apresenta forte sazonalidade, mas o início e o
+fim da época chuvosa variam entre os anos, devido à influência de padrões
+atmosféricos e da temperatura da superfície do mar
+\cite{Manhique2023OnsetMozambique}. A circulação do Canal de Moçambique
+também influencia o transporte de humidade e a precipitação no sudeste
+africano \cite{Barimalala2020MozambiqueChannelTrough}. Fenómenos como ENSO,
+IOD e IOPD podem contribuir para a previsibilidade sazonal, mas os seus
+efeitos variam conforme a região e o horizonte temporal
+\cite{Horan2024SeasonalSouthernAfrica}. Por isso, não devem ser transferidos
+automaticamente para a previsão diária em Maputo.
+
+\subsection{Dados ERA5 e limitações da precipitação de reanálise}
+
+O ERA5 combina observações meteorológicas, modelos numéricos e assimilação de
+dados, fornecendo séries contínuas de variáveis atmosféricas desde 1940
+\cite{Hersbach2020ERA5}. Contudo, não corresponde directamente às medições de
+um pluviômetro. A precipitação é estimada numa grelha espacial e pode diferir
+das observações locais, sobretudo nos trópicos e durante eventos convectivos
+intensos. Estudos identificam dificuldades na representação dos máximos
+diários e do momento da chuva \cite{Lavers2022ERA5precipitation,terblanche2022era5}.
+Assim, o ERA5 deve ser tratado como fonte de informação meteorológica, e não
+como verdade observacional absoluta.
+
+\subsection{Previsão de precipitação com modelos estatísticos}
+
+Os modelos ARIMA e SARIMA representam dependências temporais através de
+componentes autorregressivas, médias móveis, diferenciação e sazonalidade. O
+SARIMAX acrescenta variáveis exógenas, permitindo relacionar a precipitação
+com outros elementos meteorológicos. Estes modelos podem ser úteis em
+previsões de curto prazo, mas o desempenho depende do local, do horizonte e
+da métrica utilizada \cite{Lai2020arima}.
+
+Aplicações do SARIMAX indicam utilidade na previsão de séries sazonais
+\cite{mulla2024sarimax}. Porém, a precipitação diária apresenta muitos zeros,
+assimetria e eventos extremos, o que pode limitar os modelos lineares.
+Alguns estudos recorrem, por isso, a modelos híbridos que combinam métodos
+estatísticos e aprendizagem automática \cite{unnikrishnan2020hybrid}.
+
+\subsection{Aprendizagem automática na previsão meteorológica}
+
+Os métodos de aprendizagem automática representam relações não lineares e
+interacções entre variáveis meteorológicas. O Random Forest combina várias
+árvores de decisão e pode ser utilizado em regressão e classificação
+\cite{Breiman2001RF}. Contudo, a literatura não demonstra superioridade
+universal deste modelo. Estudos sobre chuva tropical identificam dificuldades
+na previsão de eventos raros e na representação da precipitação intensa
+\cite{Wang2021TropicalRainfall}. Outros trabalhos mostram que o desempenho
+depende da região, da escala temporal e das variáveis utilizadas
+\cite{Grazzini2024PrecipitationExtremes}. A importância das variáveis deve,
+portanto, ser interpretada como contribuição preditiva, não como causalidade.
+
+\subsection{Comparação entre SARIMAX e Random Forest}
+
+O SARIMAX enfatiza a dependência temporal e o efeito das variáveis exógenas,
+enquanto o Random Forest procura relações não lineares e interacções entre
+preditores. Estudos comparativos apresentam resultados diferentes conforme o
+problema analisado: em alguns casos, os modelos estatísticos superam o
+Random Forest; noutros, ocorre o contrário
+\cite{TihiPopov2024ARIMARF,Khan2024Rainfall}. Estes resultados não permitem
+definir antecipadamente o melhor modelo para Maputo, pois utilizam dados,
+períodos, alvos e métricas diferentes.
+
+\subsection{Classificação do risco pluviométrico}
+
+A previsão contínua em milímetros pode ser convertida em categorias para
+facilitar a interpretação. Porém, os limites dependem da climatologia, da
+duração do acumulado e da finalidade da análise. Uma categoria de chuva forte
+não equivale automaticamente a risco de inundação, que também depende da
+exposição, da vulnerabilidade e das condições locais.
+
+Em séries com eventos raros, a acurácia pode favorecer as classes mais
+frequentes. Por isso, devem ser consideradas métricas como precisão,
+\textit{recall}, F1-score, \textit{balanced accuracy}, Brier score e
+calibração \cite{Casati2008ForecastVerification}. A escolha dos limiares
+deve ser definida antes da avaliação final, considerando a frequência dos
+eventos e os custos de falsos alarmes e falhas
+\cite{Bouttier2024RiskThresholds}.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Metodologia}
+\subsection{Dados e área de estudo}
+
+Foram utilizados dados de reanálise ERA5 para a área representada pelas
+coordenadas de Maputo, aproximadamente 25,97$^\circ$S e 32,59$^\circ$E. O
+período analisado compreendeu 1 de Janeiro de 1995 a 30 de Dezembro de 2024.
+O ERA5 fornece estimativas meteorológicas contínuas obtidas através da
+combinação de observações e modelação numérica
+\cite{Hersbach2020ERA5}.
+
+A base inicial continha 10.958 observações diárias e 17 colunas. Após a
+remoção do registo de 31 de Dezembro de 1994, que estava fora do período
+definido, permaneceram 10.957 observações. Foram seleccionadas cinco
+variáveis: temperatura média ($^\circ$C), precipitação total (mm), humidade
+relativa média (\%), pressão média (hPa) e velocidade máxima do vento (km/h).
+A precipitação total foi definida como variável-alvo.
+
+
+\subsection{API e processamento dos dados}
+
+A extracção dos dados foi realizada através de uma
+\textit{Application Programming Interface} (API), que permite o acesso
+automatizado a dados de uma aplicação ou serviço. A preparação inicial foi
+realizada em Python, incluindo a conversão das datas, a verificação de
+registos duplicados, a identificação de valores em falta e a selecção das
+variáveis.
+
+Não foram encontrados registos duplicados, valores ausentes ou falhas no
+intervalo temporal após a remoção do primeiro registo. Os valores de
+precipitação iguais a zero foram mantidos, por representarem dias sem
+ocorrência de chuva e constituírem observações válidas.
+
+\subsection{Análise de tendência}
+
+\subsubsection{Teste de Mann--Kendall}
+
+O teste de Mann--Kendall foi utilizado para verificar a existência de uma
+tendência monotónica na série de precipitação. A hipótese nula ($H_0$)
+assume a inexistência de tendência, enquanto a hipótese alternativa ($H_1$)
+indica tendência crescente ou decrescente. A estatística do teste é dada por:
+
+\[
+S=\sum_{i=1}^{n-1}\sum_{j=i+1}^{n}
+\operatorname{sgn}(x_j-x_i),
+\]
+
+em que $x_i$ e $x_j$ são observações da série. O teste é não paramétrico e
+não exige que os dados apresentem distribuição normal
+\cite{mann1945nonparametric,kendall1975rank}.
+
+\subsubsection{Declive de Sen}
+
+O declive de Sen foi utilizado para estimar a magnitude da tendência. Para
+cada par de observações, calcula-se:
+
+\[
+Q_{ij}=\frac{x_j-x_i}{j-i}, \qquad i<j.
+\]
+
+O declive final corresponde à mediana dos valores $Q_{ij}$ e representa a
+variação da precipitação por unidade de tempo
+\cite{sen1968estimates}.
+
+\subsection{Decomposição STL}
+
+A série mensal acumulada foi decomposta pelo método STL
+(\textit{Seasonal-Trend decomposition using Loess}). A decomposição separa a
+série observada em tendência, sazonalidade e resíduo:
+
+\[
+Y_t=T_t+S_t+R_t,
+\]
+
+em que $Y_t$ representa a série observada, $T_t$ a tendência, $S_t$ a
+componente sazonal e $R_t$ o resíduo. O procedimento permitiu observar a
+estrutura sazonal e a evolução temporal da precipitação
+\cite{cleveland1990stl}.
+\subsection{Estacionariedade e autocorrelação}
+
+\subsubsection{Teste de Dickey--Fuller aumentado}
+
+A estacionariedade da série diária de precipitação foi avaliada através do
+teste de Dickey--Fuller aumentado (ADF). A estatística obtida foi
+$-10{,}35139$, com $p=2{,}53126\times10^{-18}$. Como o valor de $p$ foi
+inferior a 0,05, rejeitou-se a hipótese nula de existência de uma raiz
+unitária. A série foi, portanto, considerada estacionária e adoptou-se
+$d=0$ no modelo SARIMAX \cite{dickey1979distribution}.
+
+\subsubsection{ACF e PACF}
+
+As funções de autocorrelação (ACF) e autocorrelação parcial (PACF) foram
+analisadas para identificar a dependência temporal da precipitação e apoiar a
+definição preliminar das ordens do modelo. Em ambas, observou-se um valor
+elevado no primeiro desfasamento, enquanto os desfasamentos seguintes
+apresentaram valores próximos de zero. Com base neste comportamento, foram
+consideradas ordens autorregressivas e de média móvel baixas, posteriormente
+comparadas através dos critérios AIC, BIC e do teste de Ljung--Box.
+
+\subsection{Engenharia de variáveis}
+
+A variável-alvo foi definida como a precipitação do dia seguinte ($t+1$).
+Foram utilizados exclusivamente dados disponíveis até ao dia $t$, evitando
+informação posterior ao momento da previsão.
+
+Foram construídos 21 preditores, incluindo o mês, um indicador da época
+chuvosa, a precipitação do dia actual, as defasagens de 1, 3 e 7 dias, os
+acumulados de precipitação de 3, 7 e 30 dias, os valores actuais de
+temperatura, humidade, pressão e vento, bem como as médias móveis de 3 e 7
+dias dessas variáveis.
+
+Após a aplicação da janela de 30 dias, necessária para calcular os acumulados
+e as médias móveis, permaneceram 10.927 registos completos para a modelação.
+
+\subsection{Material}
+Os dados utilizados neste estudo foram obtidos através da Application Programming Interface (API) do ERA5, produto de reanálise climática global desenvolvido pelo Centro Europeu de Previsões Meteorológicas a Médio Prazo (ECMWF). O ERA5 fornece estimativas horárias de um grande número de variáveis atmosféricas, terrestres e oceânicas, cobrindo a Terra numa grelha de 31 km de resolução espacial, com dados disponíveis desde 1940 até ao presente \cite{hersbach2020}	\paragraph{}
+
+Para o presente estudo, foram extraídas séries temporais diárias para a localização geográfica de Maputo (latitude: 25.97°S, longitude: 32.59°E), O período analisado foi de 1 de Janeiro de 1995 a 30 de Dezembro de 2024, totalizando 10.957 observações diárias após a remoção do registo de
+31 de Dezembro de 1994. automaticamente pela API do ERA5 como ponto de referência inicial, foi removida na fase de pré-processamento dos dados, garantindo a integridade do período de análise.
+\paragraph{}
+As variáveis meteorológicas extraídas foram as seguintes: pressão atmosférica máxima, mínima e média (hPa), temperatura do ar máxima, mínima e média (°C), 
+precipitação total diária (mm), precipitação sob forma de chuva (mm), humidade relativa máxima, mínima e média (\%), velocidade máxima do vento (km/h), velocidade máxima de rajada (km/h) e direcção dominante do vento (°), totalizando 14 variáveis meteorológicas e 3.652 observações diárias \cite{hersbach2020}.
+
+\begin{table}[H]
+\centering
+\caption{Variáveis meteorológicas extraídas do ERA5}
+\begin{tabular}{llc}
+\hline
+\textbf{Variável} & \textbf{Descrição} & \textbf{Unidade} \\
+\hline
+Pressão Máx/Mín/Méd & Pressão atmosférica & hPa \\
+Temp. Máx/Mín/Méd   & Temperatura do ar   & °C  \\
+Precipitação Total  & Precipitação diária & mm  \\
+Chuva               & Precipitação líquida & mm \\
+Humidade Máx/Mín/Méd & Humidade relativa  & \% \\
+Vel. Vento Máx      & Velocidade do vento & km/h \\
+Rajada Máx          & Rajada máxima       & km/h \\
+Direcção Vento      & Direcção dominante  & °   \\
+\hline
+\end{tabular}
+\label{tab:variaveis}
+\end{table}
+
+\subsection{Ferramentas}
+O processamento e análise dos dados foram realizados com recurso a dois ambientes computacionais complementares. A extracção e o pré-processamento dos dados ERA5 foram efectuados em linguagem Python, através da plataforma Google Colaboratory (Colab), utilizando as bibliotecas 
+\textit{openmeteo-requests} para acesso à API, \textit{pandas} para manipulação dos dados e \textit{openpyxl} para exportação em formato Excel. \paragraph{}
+A análise estatística e a modelagem preditiva foram realizadas no ambiente RStudio, utilizando a linguagem R, reconhecida pela sua robustez no tratamento de séries temporais e na implementação de modelos estatísticos e de Machine Learning. Os pacotes utilizados incluem, entre 
+outros, \textit{forecast} para modelagem de séries temporais, \textit{Kendall} para detecção de tendências, \textit{randomForest} para modelagem preditiva e \textit{ggplot2} para visualização gráfica dos resultados.\paragraph{}
+\subsection{Estacionariedade e autocorrelação}
+
+\subsubsection{Teste de Dickey--Fuller aumentado}
+
+A estacionariedade da série diária de precipitação foi avaliada através do
+teste de Dickey--Fuller aumentado (ADF). A estatística obtida foi
+$-10{,}35139$, com $p=2{,}53126\times10^{-18}$. Como o valor de $p$ foi
+inferior a 0,05, rejeitou-se a hipótese nula de existência de uma raiz
+unitária. A série foi, portanto, considerada estacionária e adoptou-se
+$d=0$ no modelo SARIMAX \cite{dickey1979distribution}.
+
+\subsubsection{ACF e PACF}
+
+As funções de autocorrelação (ACF) e autocorrelação parcial (PACF) foram
+analisadas para identificar a dependência temporal da precipitação e apoiar a
+definição preliminar das ordens do modelo. Em ambas, observou-se um valor
+elevado no primeiro desfasamento, enquanto os desfasamentos seguintes
+apresentaram valores próximos de zero. Com base neste comportamento, foram
+consideradas ordens autorregressivas e de média móvel baixas, posteriormente
+comparadas através dos critérios AIC, BIC e do teste de Ljung--Box.
+
+\subsection{Engenharia de variáveis}
+
+A variável-alvo foi definida como a precipitação do dia seguinte ($t+1$).
+Foram utilizados exclusivamente dados disponíveis até ao dia $t$, evitando
+informação posterior ao momento da previsão.
+
+Foram construídos 21 preditores, incluindo o mês, um indicador da época
+chuvosa, a precipitação do dia actual, as defasagens de 1, 3 e 7 dias, os
+acumulados de precipitação de 3, 7 e 30 dias, os valores actuais de
+temperatura, humidade, pressão e vento, bem como as médias móveis de 3 e 7
+dias dessas variáveis.
+
+Após a aplicação da janela de 30 dias, necessária para calcular os acumulados
+e as médias móveis, permaneceram 10.927 registos completos para a modelação.
+
+    \section{Resultados}
+    
+    \subsection{Análise exploratória da precipitação}
+    
+    Das 10.957 observações diárias, entre 1 de Janeiro de 1995 e 30 de Dezembro de 2024, a precipitação média diária foi de 1,87~mm, com desvio padrão de 6,28~mm. A mediana foi igual a 0~mm e o terceiro quartil correspondeu a 0,8~mm, indicando uma distribuição assimétrica, com elevada concentração de valores nulos e ocorrência ocasional de eventos intensos.
+    
+    Dos 10.957 dias analisados, 6.544 não registaram precipitação, correspondendo a 59,72\% da série. O maior valor diário observado foi de 125,3~mm, registado em 22 de Janeiro de 2004. Este valor foi mantido por representar um evento extremo válido.
+    
+    As variáveis meteorológicas utilizadas como preditoras apresentaram médias de 22,85~$^\circ$C para a temperatura, 73,35\% para a humidade, 1010,24~hPa para a pressão e 21,28~km/h para a velocidade máxima do vento.
+    
+    \begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Estatísticas descritivas das variáveis analisadas}
+    \label{tab:estatisticas_descritivas}
+    \setlength{\tabcolsep}{3pt}
+    \resizebox{\ifdim\width>\columnwidth\columnwidth\else\width\fi}{!}{%
+    \begin{tabular}{lrrrrr}
+    \toprule
+    \textbf{Variável} & \textbf{Média} & \textbf{DP} &
+    \textbf{Mín.} & \textbf{Mediana} & \textbf{Máx.} \\
+    \midrule
+    Temperatura ($^\circ$C) & 22,85 & 2,91 & 13,00 & 23,00 & 32,10 \\
+    Precipitação (mm) & 1,87 & 6,28 & 0,00 & 0,00 & 125,30 \\
+    Humidade (\%) & 73,35 & 8,63 & 25,10 & 74,70 & 93,70 \\
+    Pressão (hPa) & 1010,24 & 5,54 & 993,73 & 1009,74 & 1031,56 \\
+    Vento máximo (km/h) & 21,28 & 5,72 & 7,40 & 20,70 & 47,70 \\
+    \bottomrule
+    \end{tabular}}
+    \end{table}
+    
+    \subsection{Distribuição mensal da precipitação}
+    
+    A Figura~\ref{fig:distribuicao_precipitacao} evidencia uma sazonalidade marcada. Os maiores valores e a maior dispersão ocorreram sobretudo em Janeiro, Fevereiro, Março, Novembro e Dezembro. Entre Maio e Agosto observaram-se menores volumes e maior concentração de valores próximos de zero.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\columnwidth]{DistrMensPrecip.png}
+        \caption{Distribuição mensal da precipitação total, 1995--2024.}
+        \label{fig:distribuicao_precipitacao}
+    \end{figure}
+    
+    \subsection{Precipitação acumulada e intensidade da chuva}
+    
+    A Figura~\ref{fig:precipitacao_acumulada_intensidade} apresenta a precipitação total acumulada por mês e a distribuição da intensidade da chuva nos dias chuvosos. Os maiores acumulados ocorreram em Janeiro, Fevereiro e Dezembro, enquanto Junho, Julho e Agosto apresentaram os menores valores.
+    
+    A distribuição da intensidade apresenta assimetria positiva. A maioria dos eventos foi de baixa intensidade, enquanto os eventos mais intensos foram menos frequentes. A escala logarítmica permite visualizar simultaneamente eventos frequentes e raros.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\columnwidth]{Intesidade.png}
+        \caption{Precipitação acumulada por mês e distribuição da intensidade da chuva nos dias chuvosos, 1995--2024.}
+        \label{fig:precipitacao_acumulada_intensidade}
+    \end{figure}
+    
+    \subsection{Decomposição STL}
+    
+    A Figura~\ref{fig:stl_precipitacao} mostra uma sazonalidade anual regular e uma tendência não monotónica. A componente sazonal apresenta valores negativos na época seca e positivos na época chuvosa. Os resíduos concentram-se em torno de zero, mas incluem desvios superiores a 100~mm associados a eventos extremos.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\columnwidth]{DSTL.png}
+        \caption{Decomposição STL da precipitação mensal acumulada, 1995--2024.}
+        \label{fig:stl_precipitacao}
+    \end{figure}
+    
+    \subsection{Tendência temporal da precipitação}
+    
+    O teste de Mann--Kendall aplicado à série diária indicou uma tendência decrescente, com $p=0{,}0104$ e $\tau=-0{,}0145$. O declive de Sen foi apresentado como aproximadamente zero devido ao arredondamento e à elevada frequência de dias sem chuva.
+    
+    \begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Teste de Mann--Kendall e declive de Sen da precipitação diária}
+    \label{tab:mk}
+    \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Variável} & \textbf{Tendência} & \textbf{$p$-valor} &
+    \textbf{$\tau$} & \textbf{Sen} \\
+    \midrule
+    Precipitação diária & Decrescente & 0,0104 & -0,0145 & 0,00000 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+    
+    \subsection{Correlação entre variáveis}
+    
+    A Figura~\ref{fig:matriz_correlacao} apresenta a matriz de correlação de Pearson. A humidade média apresentou a maior correlação positiva com a precipitação ($r=0{,}32$), seguida da velocidade máxima do vento ($r=0{,}17$). A pressão média apresentou correlação negativa ($r=-0{,}13$), enquanto a temperatura apresentou relação linear muito fraca ($r=0{,}05$).
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\columnwidth]{Corr.png}
+        \caption{Matriz de correlação de Pearson entre as variáveis meteorológicas diárias, 1995--2024.}
+        \label{fig:matriz_correlacao}
+    \end{figure}
+    
+    \subsection{Engenharia de variáveis}
+    
+    Foram construídos 21 preditores com informação do dia $t$ ou de dias anteriores. Foram incluídas variáveis de calendário, defasagens e acumulados da precipitação, além dos valores actuais e das médias móveis de 3 e 7 dias das variáveis meteorológicas. Após a aplicação da janela de 30 dias, restaram 10.927 registos completos.
+    
+    \subsection{Separação temporal e controlo do vazamento de informação}
+    
+    Os 10.927 registos foram divididos cronologicamente, sem embaralhamento, em treino, validação e teste. O conjunto de treino teve 7.648 registos, o de validação 1.639 e o de teste 1.640. A variável-alvo correspondeu à precipitação do dia seguinte, e nenhum preditor utilizou informação posterior ao dia $t$.
+    
+    \subsection{Modelo SARIMAX}
+    
+    \subsubsection{Teste de Dickey--Fuller aumentado}
+    
+    O teste ADF apresentou estatística de $-10{,}35139$ e valor de $p=2{,}53126\times10^{-18}$. A série foi considerada estacionária, permitindo adoptar $d=0$ no modelo SARIMAX.
+    
+    \subsubsection{Identificação da ordem do modelo}
+    
+    A ACF e a PACF apresentaram os maiores valores no primeiro desfasamento, tendo sido considerada inicialmente a ordem $(p,d,q)=(1,0,1)$.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\columnwidth]{Ordem.png}
+        \caption{Funções de autocorrelação e autocorrelação parcial da precipitação.}
+        \label{fig:acf_pacf}
+    \end{figure}
+    
+    \subsubsection{Representação da sazonalidade}
+    
+    A sazonalidade foi representada através do mês e de um indicador binário da época chuvosa. Estas variáveis foram complementadas por defasagens, acumulados e médias móveis.
+    
+    \subsection{Modelo Random Forest}
+    
+    \subsubsection{Validação cruzada temporal}
+    
+    A validação cruzada temporal foi realizada em cinco divisões sucessivas, preservando a ordem cronológica. O Random Forest apresentou MAE médio de 2,3734~mm, RMSE médio de 5,8043~mm e $R^2$ médio de 0,1369.
+    
+    \subsubsection{Optimização dos hiperparâmetros}
+    
+    A optimização foi realizada com o método \textit{GridSearchCV}, considerando 24 combinações e três divisões de validação. A melhor configuração utilizou 150 árvores, profundidade máxima de 8, duas observações mínimas por folha e duas observações mínimas para dividir um nó.
+    
+    O MAE diminuiu de 2,3441 para 2,2967~mm, enquanto o RMSE diminuiu de 5,9191 para 5,8569~mm.
+    
+    \subsection{Classificação do risco pluviométrico}
+    
+    As previsões contínuas do SARIMAX(1,0,1) e do Random Forest foram convertidas em cinco categorias: sem chuva, chuva fraca, chuva moderada, chuva forte e chuva extrema.
+    
+    O SARIMAX apresentou acurácia de 0,47, F1-score macro de 0,17 e Kappa de Cohen de 0,0909. O Random Forest apresentou acurácia de 0,39, F1-score macro de 0,18 e Kappa de Cohen de 0,0002.
+    
+    \subsection{Matrizes de confusão}
+    
+    As matrizes de confusão dos dois regressores são apresentadas na Figura~\ref{fig:matrizes_confusao}.
+    
+    \begin{figure*}[t]
+        \centering
+        \includegraphics[width=\textwidth]{ClassificacaoDeErros.png}
+        \caption{Matrizes de confusão do SARIMAX(1,0,1) e do Random Forest após a conversão das previsões em categorias de risco.}
+        \label{fig:matrizes_confusao}
+    \end{figure*}
+    
+    \subsection{Métricas robustas de classificação}
+    
+    No conjunto de teste, observaram-se 898 dias sem chuva, 657 dias de chuva fraca, 45 dias de chuva moderada, 37 dias de chuva forte e 3 dias de chuva extrema.
+    
+    A \textit{balanced accuracy} foi de 0,2226 para o SARIMAX e de 0,2433 para o Random Forest. O F1-score macro foi de 0,1717 e 0,1780, respectivamente.
+    
+    \subsection{Importância das variáveis}
+    
+    \begin{table}[H]
+    \centering
+    \footnotesize
+    \caption{Dez variáveis mais importantes no modelo Random Forest}
+    \label{tab:top10_importancia}
+    \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Variável} & \textbf{MDI} &
+    \textbf{Permutação} & \textbf{Desvio padrão} \\
+    \midrule
+    Precipitação no dia actual & 0,193447 & 0,453979 & 0,041815 \\
+    Pressão média & 0,120732 & 0,160370 & 0,025765 \\
+    Precipitação acumulada em 7 dias & 0,049400 & 0,104985 & 0,022341 \\
+    Pressão média -- média móvel de 3 dias & 0,041079 & 0,081830 & 0,012803 \\
+    Humidade média & 0,090522 & 0,073981 & 0,005661 \\
+    Temperatura média & 0,054802 & 0,027177 & 0,010799 \\
+    Velocidade máxima do vento & 0,038752 & 0,025180 & 0,011358 \\
+    Temperatura média -- média móvel de 7 dias & 0,031191 & 0,016407 & 0,002924 \\
+    Precipitação acumulada em 3 dias & 0,026184 & 0,014178 & 0,004796 \\
+    Velocidade máxima do vento -- média móvel de 7 dias & 0,051919 & 0,012749 & 0,006501 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+    
+    A importância das variáveis foi avaliada através da importância MDI, calculada no treino, e da importância por permutação, calculada no teste. A precipitação do dia actual apresentou o maior valor nas duas medidas, seguida da pressão média e da precipitação acumulada em sete dias.
+
+    
+    \subsubsection{Avaliação final no conjunto de teste}
+
+A avaliação final foi realizada no conjunto de teste, constituído por 1.640 observações que não participaram no treino nem na selecção dos modelos. Os resultados são apresentados na Tabela~\ref{tab:avaliacao_final_teste}.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Avaliação final dos modelos no conjunto de teste}
+\label{tab:avaliacao_final_teste}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Modelo} & \textbf{MAE (mm)} & \textbf{RMSE (mm)} &
+\textbf{$R^2$} & \textbf{Correlação ($r$)} \\
+\midrule
+SARIMAX(1,0,1) & 2,6852 & 5,9886 & 0,0683 & 0,2642 \\
+Random Forest (base) & 2,4196 & 5,7549 & 0,1396 & 0,3959 \\
+Random Forest (optimizado) & 2,3569 & 5,6975 & 0,1567 & 0,4040 \\
+\bottomrule
+\end{tabular}
+\end{table}
+    O Random Forest optimizado apresentou MAE de 2,3569~mm, RMSE de 5,6975~mm, $R^2$ de 0,1567 e correlação de 0,4040. O SARIMAX(1,0,1) apresentou MAE de 2,6852~mm, RMSE de 5,9886~mm, $R^2$ de 0,0683 e correlação de 0,2642. O Random Forest base apresentou MAE de 2,4196~mm, RMSE de 5,7549~mm, $R^2$ de 0,1396 e correlação de 0,3959.
+    
+    \subsubsection{Matrizes de confusão dos classificadores dedicados}
+    
+    As matrizes de confusão dos classificadores Random Forest e XGBoost são
+    apresentadas na Figura~\ref{fig:matrizes_classificadores}. As linhas
+    representam as categorias observadas e as colunas correspondem às categorias
+    previstas.
+    \begin{figure*}[t]
+        \centering
+        \includegraphics[width=\textwidth]{Matrizdeconfusao.png}
+        \caption{Matrizes de confusão dos classificadores Random Forest e XGBoost
+        para as categorias de risco pluviométrico.}
+        \label{fig:matrizes_classificadores}
+    \end{figure*}
+\newpage
+\section{Discussão}
+
+\subsection{Sazonalidade e variabilidade da precipitação}
+
+Os resultados mostram que a precipitação em Maputo apresenta uma sazonalidade
+marcada. Os maiores acumulados ocorreram principalmente entre Novembro e
+Março, enquanto os menores valores foram observados entre Maio e Agosto.
+Este padrão também foi evidenciado pela decomposição STL, cuja componente
+sazonal apresentou um ciclo anual regular.
+
+A precipitação diária apresentou elevada variabilidade, com 59,72\% dos dias
+sem chuva e poucos eventos de intensidade elevada. O máximo diário de
+125,3~mm, registado em 22 de Janeiro de 2004, demonstra a ocorrência de
+eventos extremos dentro da série. Esta distribuição, caracterizada por
+muitos valores nulos e uma cauda direita acentuada, constitui um desafio
+para a previsão diária e para a classificação das categorias de risco.
+
+\subsection{Tendência temporal da precipitação}
+
+O teste de Mann--Kendall aplicado à série diária indicou uma tendência
+decrescente estatisticamente significativa, com $p=0{,}0104$ e
+$\tau=-0{,}0145$. Contudo, o baixo valor absoluto de $\tau$ indica uma
+tendência monotónica muito fraca. Além disso, o declive de Sen foi
+aproximadamente nulo.
+
+As séries agregadas anuais e sazonais não apresentaram tendências
+estatisticamente significativas. Assim, os resultados não permitem afirmar
+que tenha ocorrido uma redução consistente da precipitação em todo o
+período de 1995 a 2024. A significância observada na série diária deve ser
+interpretada com cautela, considerando a elevada frequência de dias secos,
+a sazonalidade e a variabilidade da precipitação.
+
+
+\subsection{Comparação dos modelos de previsão}
+
+Na previsão do volume de precipitação do dia seguinte, o Random Forest
+optimizado apresentou o melhor desempenho no conjunto de teste. O modelo
+obteve MAE de 2,3569~mm, RMSE de 5,6975~mm, $R^2$ de 0,1567 e correlação de
+0,4040. O Random Forest base apresentou MAE de 2,4196~mm, RMSE de
+5,7549~mm, $R^2$ de 0,1396 e correlação de 0,3959. Por sua vez, o
+SARIMAX(1,0,1) apresentou MAE de 2,6852~mm, RMSE de 5,9886~mm, $R^2$ de
+0,0683 e correlação de 0,2642.
+
+A superioridade do Random Forest sugere que as relações entre a
+precipitação e os preditores utilizados não são inteiramente lineares. O
+modelo também pode explorar interacções entre as variáveis meteorológicas,
+as defasagens e os acumulados recentes da precipitação. A optimização dos
+hiperparâmetros produziu uma melhoria relativamente pequena, com redução de
+2,02\% no MAE e de 1,05\% no RMSE, indicando que a configuração inicial já
+apresentava desempenho razoável.
+
+Apesar da superioridade do Random Forest, o valor de $R^2$ obtido no teste
+foi moderado. Este resultado indica que uma parte considerável da
+variabilidade diária da precipitação não foi explicada pelos preditores
+utilizados. A capacidade preditiva deve, portanto, ser considerada útil
+para apoio à decisão, mas insuficiente para representar isoladamente um
+sistema operacional de previsão de eventos extremos.
+
+\subsection{Classificação do risco pluviométrico}
+
+A conversão das previsões contínuas dos regressores em categorias de risco
+apresentou desempenho limitado. O SARIMAX obteve acurácia de 0,47,
+\textit{balanced accuracy} de 0,2226 e F1-score macro de 0,1717. O Random
+Forest Regressor obteve acurácia de 0,39, \textit{balanced accuracy} de
+0,2433 e F1-score macro de 0,1780.
+
+Os classificadores dedicados apresentaram resultados superiores aos obtidos
+pela conversão das previsões dos regressores. O Random Forest Classifier
+obteve \textit{balanced accuracy} de 0,2883 e F1-score macro de 0,2879,
+enquanto o XGBoost Classifier apresentou \textit{balanced accuracy} de
+0,3159 e F1-score macro de 0,3097.
+
+Apesar desse desempenho, nenhum dos classificadores identificou
+correctamente os três eventos da categoria ``Chuva Extrema''. A reduzida
+frequência das classes de chuva forte e extrema também se reflectiu nos
+baixos valores de \textit{recall} e F1-score. Assim, os resultados indicam
+que a classificação das categorias menos frequentes continua a ser uma
+limitação importante.
+
+\subsection{Importância das variáveis}
+
+A precipitação do dia actual foi a variável mais importante na previsão da
+precipitação do dia seguinte, tanto pela importância MDI como pela
+importância por permutação. A pressão média apresentou a segunda maior
+importância por permutação, seguida da precipitação acumulada em sete dias e
+da pressão média calculada para três dias.
+
+A importância das defasagens e dos acumulados confirma a relevância da
+memória recente da precipitação. As variáveis meteorológicas também
+contribuíram para a previsão, embora com valores inferiores aos das
+variáveis directamente relacionadas com a precipitação. Estes resultados
+devem ser interpretados como contribuição preditiva dentro do Random Forest,
+não como evidência de relações causais.
+
+\subsection{Implicações para a tomada de decisão}
+
+Os resultados podem apoiar decisões relacionadas com o planeamento
+agrícola, a gestão da drenagem urbana, a organização de actividades de
+campo e a preparação de operações afectadas pela ocorrência de chuva. A
+previsão do volume pode contribuir para antecipar dias com maior
+probabilidade de precipitação, enquanto a classificação pode auxiliar na
+organização de diferentes níveis de resposta.
+
+Contudo, devido à limitada identificação dos eventos extremos, os modelos
+não devem ser utilizados de forma autónoma para emitir alertas críticos.
+A sua aplicação deve ser combinada com observações locais, previsões
+meteorológicas oficiais e informação complementar sobre ciclones,
+humidade do solo, circulação atmosférica e condições de drenagem.
+
+\subsection{Limitações do estudo}
+Este estudo apresenta algumas limitações. Primeiro, a análise baseou-se em dados de reanálise ERA5, que podem não representar totalmente a
+variabilidade local da precipitação na Província de Maputo. Segundo, a distribuição das categorias de risco foi desequilibrada, com apenas três
+eventos extremos no conjunto de teste. Terceiro, os regressores foram convertidos posteriormente em categorias, não tendo sido treinados originalmente para a classificação do risco.
+
+Além disso, o desempenho preditivo pode ser melhorado com a inclusão de variáveis adicionais, como índices de circulação atmosférica, ocorrência de
+ciclones, humidade do solo, temperatura da superfície do mar e informação
+topográfica. A validação com dados observacionais locais também poderá
+melhorar a avaliação da utilidade operacional dos modelos.
+
+\section{Conclusão}
+
+Este estudo comparou o desempenho dos modelos SARIMAX e Random Forest na
+previsão da precipitação do dia seguinte e na classificação do risco
+pluviométrico na Província de Maputo, utilizando dados de reanálise ERA5
+referentes ao período de 1995 a 2024.
+
+A análise exploratória mostrou que a precipitação apresenta forte
+sazonalidade, com maiores acumulados entre Novembro e Março e menores
+valores entre Maio e Agosto. A série também apresentou elevada variabilidade,
+com 59,72\% dos dias sem chuva e ocorrência ocasional de eventos intensos.
+O teste de Mann--Kendall indicou uma tendência decrescente na série diária,
+mas a magnitude do efeito foi muito reduzida e as séries agregadas anuais e
+sazonais não apresentaram tendências estatisticamente significativas.
+
+Na previsão do volume de precipitação, o Random Forest optimizado apresentou
+o melhor desempenho no conjunto de teste, com MAE de 2,3569~mm, RMSE de
+5,6975~mm, $R^2$ de 0,1567 e correlação de 0,4040. O modelo superou o
+SARIMAX(1,0,1), que apresentou MAE de 2,6852~mm, RMSE de 5,9886~mm,
+$R^2$ de 0,0683 e correlação de 0,2642. Assim, para a previsão quantitativa
+da precipitação do dia seguinte, o Random Forest apresentou maior desempenho
+preditivo.
+
+A precipitação do dia actual foi a variável mais importante para o Random
+Forest, seguida da pressão média, da precipitação acumulada em sete dias e
+da pressão média calculada para três dias. Estes resultados mostram a
+relevância da precipitação recente e das condições atmosféricas na previsão
+do dia seguinte.
+
+Na classificação do risco pluviométrico, os classificadores dedicados
+apresentaram melhor desempenho do que a conversão posterior das previsões
+dos regressores em categorias. O XGBoost apresentou os melhores resultados,
+com \textit{balanced accuracy} de 0,3159 e F1-score macro de 0,3097,
+seguido do Random Forest Classifier, com valores de 0,2883 e 0,2879,
+respectivamente. Contudo, nenhum modelo identificou correctamente os
+eventos de chuva extrema.
+
+Conclui-se que o Random Forest optimizado é o modelo mais adequado entre os
+modelos avaliados para prever o volume diário de precipitação em Maputo,
+enquanto o XGBoost apresentou o melhor desempenho na classificação das
+categorias de risco. Apesar disso, os modelos devem ser utilizados como
+ferramentas de apoio à tomada de decisão e não como sistemas autónomos de
+alerta, sobretudo para eventos extremos.
+
+A utilização operacional destes resultados requer validação com observações
+pluviométricas locais e a inclusão de variáveis adicionais, como ciclones,
+circulação atmosférica, humidade do solo, temperatura da superfície do mar e
+informação topográfica. Estudos futuros poderão também testar métodos
+específicos para dados desequilibrados e modelos desenvolvidos directamente
+para a classificação de eventos extremos.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\bibliography{Reference}
+
+% Full bibliography added automatically for Optics Letters submissions; the following line will simply be ignored if submitting to other journals.
+% Note that this extra page will not count against page length
+\bibliographyfullrefs{}
+
+%Manual citation list
+%\begin{thebibliography}{1}
+%\bibitem{Zhang:14}
+%Y.~Zhang, S.~Qiao, L.~Sun, Q.~W. Shi, W.~Huang, %L.~Li, and Z.~Yang,
+ % \enquote{Photoinduced active terahertz metamaterials with nanostructured
+  %vanadium dioxide film deposited by sol-gel method,} Opt. Express \textbf{22},
+  %11070--11078 (2014).
+%\end{thebibliography}
+
+% Please include bios and photos of all authors for aop articles
+\ifthenelse{\equal{\journalref}{aop}}{%
+\section*{Author Biographies}
+\begingroup
+\setlength\intextsep{0pt}
+\begin{minipage}[t][6.3cm][t]{1.0\textwidth} % Adjust height [6.3cm] as required for separation of bio photos.
+  \begin{wrapfigure}{L}{0.25\textwidth}
+    \includegraphics[width=0.25\textwidth]{john_smith.eps}
+  \end{wrapfigure}
+  \noindent
+  {\bfseries John Smith} received his BSc (Mathematics) in 2000 from The University of Maryland. His research interests include lasers and optics.
+\end{minipage}
+\begin{minipage}{1.0\textwidth}
+  \begin{wrapfigure}{L}{0.25\textwidth}
+    \includegraphics[width=0.25\textwidth]{alice_smith.eps}
+  \end{wrapfigure}
+  \noindent
+  {\bfseries Alice Smith} also received her BSc (Mathematics) in 2000 from The University of Maryland. Her research interests also include lasers and optics.
+\end{minipage}
+\endgroup
+}{}
+
+
+\end{document}
+ 
