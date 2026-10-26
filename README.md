@@ -27,7 +27,7 @@ ERA5 (Copernicus Climate Change Service). Os dados brutos não estão incluídos
 
 ## Como citar
 
-Magaia, G. C. J. (2026). *Previsão da Precipitação e Classificação do Risco Pluviométrico na Província de Maputo*. Preprint. DOI: (a adicionar após o Zenodo)
+Magaia, G. C. J. (2026). *Previsão da Precipitação e Classificação do Risco Pluviométrico na Província de Maputo*. Preprint. DOI: ([![DOI](https://zenodo.org/badge/1434180217.svg)](https://doi.org/10.5281/zenodo.23662484))
 
 ## Licença
 
