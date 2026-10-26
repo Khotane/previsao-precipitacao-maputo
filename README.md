@@ -19,6 +19,7 @@ Comparação entre SARIMAX, Random Forest e XGBoost na previsão da precipitaç�
 
 - `precipitacao.py`: código da análise e dos modelos
 - `main.tex`: fonte LaTeX do preprint
+-  `Reference.bib`: fonte LaTeX do preprint
 - `Previsao-Precipitacao-Maputo.pdf`: versão em PDF
 
 ## Dados
