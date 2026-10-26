@@ -1,0 +1,412 @@
+@article{hersbach2020era5,
+  author  = {Hersbach, Hans and others},
+  title   = {The ERA5 Global Reanalysis},
+  journal = {Quarterly Journal of the Royal Meteorological Society},
+  year    = {2020},
+  volume  = {146},
+  number  = {730},
+  pages   = {1999--2049},
+  doi     = {10.1002/qj.3803}
+}
+
+@article{funk2015chirps,
+  author  = {Funk, Chris and others},
+  title   = {The Climate Hazards Infrared Precipitation with Stations: A New Environmental Record for Monitoring Extremes},
+  journal = {Scientific Data},
+  year    = {2015},
+  volume  = {2},
+  pages   = {150066},
+  doi     = {10.1038/sdata.2015.66}
+}
+
+@online{wmo_mozambique_2024,
+  author  = {{World Meteorological Organization}},
+  title   = {Mozambique Takes Strides Towards Early Warnings for All},
+  year    = {2024},
+  url     = {https://wmo.int/media/news/mozambique-takes-strides-towards-early-warnings-all},
+  urldate = {2026-10-23}
+}
+@article{muleia2024mozambique,
+  author  = {Muleia, R. and others},
+  title   = {Assessing the Vulnerability and Adaptation Needs of Mozambique to Climate Change},
+  journal = {International Journal of Environmental Research and Public Health},
+  year    = {2024},
+  volume  = {21},
+  number  = {5},
+  pages   = {532},
+  doi     = {10.3390/ijerph21050532}
+}
+
+@article{matos2023maputo,
+  author  = {Matos, J. P. and others},
+  title   = {Evaluating Compound Flooding Risks in Coastal Cities under Climate Change: The Maputo Case Study, in Mozambique},
+  journal = {Sustainability},
+  year    = {2023},
+  volume  = {15},
+  number  = {19},
+  pages   = {14497},
+  doi     = {10.3390/su151914497}
+}
+
+@online{worldbank_mozambique_climate,
+  author  = {{World Bank}},
+  title   = {Mozambique: Climate Change Knowledge Portal},
+  year    = {2025},
+  url     = {https://climateknowledgeportal.worldbank.org/country/mozambique},
+  urldate = {2026-10-23}
+}
+
+@online{wmo_mozambique_2024,
+  author  = {{World Meteorological Organization}},
+  title   = {Mozambique Takes Strides Towards Early Warnings for All},
+  year    = {2024},
+  url     = {https://wmo.int/media/news/mozambique-takes-strides-towards-early-warnings-all},
+  urldate = {2026-10-23}
+}
+
+@article{hersbach2020era5,
+  author  = {Hersbach, Hans and others},
+  title   = {The ERA5 Global Reanalysis},
+  journal = {Quarterly Journal of the Royal Meteorological Society},
+  year    = {2020},
+  volume  = {146},
+  number  = {730},
+  pages   = {1999--2049},
+  doi     = {10.1002/qj.3803}
+}
+@article{hersbach2020era5,
+  author  = {Hersbach, Hans and others},
+  title   = {The ERA5 Global Reanalysis},
+  journal = {Quarterly Journal of the Royal Meteorological Society},
+  year    = {2020},
+  volume  = {146},
+  number  = {730},
+  pages   = {1999--2049},
+  doi     = {10.1002/qj.3803}
+}
+
+@online{wmo_mozambique_2024,
+  author  = {{World Meteorological Organization}},
+  title   = {Mozambique Takes Strides Towards Early Warnings for All},
+  year    = {2024},
+  url     = {https://wmo.int/media/news/mozambique-takes-strides-towards-early-warnings-all},
+  urldate = {2026-10-23}
+}
+
+@article{box2015time,
+  author    = {Box, George E. P. and Jenkins, Gwilym M. and Reinsel, Gregory C. and Ljung, Greta M.},
+  title     = {Time Series Analysis: Forecasting and Control},
+  publisher = {John Wiley \& Sons},
+  year      = {2015},
+  edition   = {5}
+}
+
+@article{breiman2001random,
+  author  = {Breiman, Leo},
+  title   = {Random Forests},
+  journal = {Machine Learning},
+  year    = {2001},
+  volume  = {45},
+  number  = {1},
+  pages   = {5--32},
+  doi     = {10.1023/A:1010933404324}
+}
+@book{wmo2018guide,
+  author    = {{World Meteorological Organization}},
+  title     = {Guide to Instruments and Methods of Observation},
+  publisher = {World Meteorological Organization},
+  year      = {2018},
+  number    = {8}
+}
+
+@article{hersbach2020era5,
+  author  = {Hersbach, Hans and others},
+  title   = {The ERA5 Global Reanalysis},
+  journal = {Quarterly Journal of the Royal Meteorological Society},
+  year    = {2020},
+  volume  = {146},
+  number  = {730},
+  pages   = {1999--2049},
+  doi     = {10.1002/qj.3803}
+}
+
+@article{mann1945nonparametric,
+  author  = {Mann, Henry B.},
+  title   = {Nonparametric Tests Against Trend},
+  journal = {Econometrica},
+  year    = {1945},
+  volume  = {13},
+  number  = {3},
+  pages   = {245--259},
+  doi     = {10.2307/1907187}
+}
+
+@book{kendall1975rank,
+  author    = {Kendall, Maurice G.},
+  title     = {Rank Correlation Methods},
+  publisher = {Griffin},
+  year      = {1975},
+  edition   = {4}
+}
+
+@article{sen1968estimates,
+  author  = {Sen, Pranab Kumar},
+  title   = {Estimates of the Regression Coefficient Based on Kendall's Tau},
+  journal = {Journal of the American Statistical Association},
+  year    = {1968},
+  volume  = {63},
+  number  = {324},
+  pages   = {1379--1389},
+  doi     = {10.1080/01621459.1968.10480934}
+}
+
+@article{cleveland1990stl,
+  author  = {Cleveland, Robert B. and Cleveland, William S. and McRae, Jean E. and Terpenning, Irma},
+  title   = {STL: A Seasonal-Trend Decomposition Procedure Based on Loess},
+  journal = {Journal of Official Statistics},
+  year    = {1990},
+  volume  = {6},
+  number  = {1},
+  pages   = {3--73}
+}
+
+@article{dickey1979distribution,
+  author  = {Dickey, David A. and Fuller, Wayne A.},
+  title   = {Distribution of the Estimators for Autoregressive Time Series with a Unit Root},
+  journal = {Journal of the American Statistical Association},
+  year    = {1979},
+  volume  = {74},
+  number  = {366},
+  pages   = {427--431},
+  doi     = {10.2307/2286348}
+}
+
+@book{box2015time,
+  author    = {Box, George E. P. and Jenkins, Gwilym M. and Reinsel, Gregory C. and Ljung, Greta M.},
+  title     = {Time Series Analysis: Forecasting and Control},
+  publisher = {John Wiley \& Sons},
+  year      = {2015},
+  edition   = {5}
+}
+
+@article{breiman2001random,
+  author  = {Breiman, Leo},
+  title   = {Random Forests},
+  journal = {Machine Learning},
+  year    = {2001},
+  volume  = {45},
+  number  = {1},
+  pages   = {5--32},
+  doi     = {10.1023/A:1010933404324}
+}
+
+@article{sokolova2009systematic,
+  author  = {Sokolova, Marina and Lapalme, Guy},
+  title   = {A Systematic Analysis of Performance Measures for Classification Tasks},
+  journal = {Information Processing \& Management},
+  year    = {2009},
+  volume  = {45},
+  number  = {4},
+  pages   = {427--437},
+  doi     = {10.1016/j.ipm.2009.03.002}
+}
+
+@book{molnar2022interpretable,
+  author    = {Molnar, Christoph},
+  title     = {Interpretable Machine Learning},
+  publisher = {Lulu.com},
+  year      = {2022},
+  edition   = {2}
+}
+@article{Manhique2023OnsetMozambique,
+  author  = {Manhique, A. J. and Reason, C. J. C. and Barimalala, R.},
+  title   = {Rainfall onset and cessation over Mozambique and relationship with sea surface temperature and atmospheric patterns},
+  journal = {International Journal of Climatology},
+  year    = {2023},
+  doi     = {10.1002/joc.8120}
+}
+
+@article{Barimalala2020MozambiqueChannelTrough,
+  author  = {Barimalala, Rondrotiana and Blamey, Ross C. and Desbiolles, Fabien and Reason, Chris J. C.},
+  title   = {Variability in the Mozambique Channel Trough and Impacts on Southeast African Rainfall},
+  journal = {Journal of Climate},
+  year    = {2020},
+  volume  = {33},
+  number  = {2},
+  pages   = {749--766},
+  doi     = {10.1175/JCLI-D-19-0267.1}
+}
+
+@article{Horan2024SeasonalSouthernAfrica,
+  author  = {Horan, Matthew F. and Kucharski, Fred and Ashfaq, Moetasim},
+  title   = {Seasonal variability and predictability of monsoon precipitation in Southern Africa},
+  journal = {Environmental Research Letters},
+  year    = {2024},
+  volume  = {19},
+  number  = {3},
+  pages   = {034010},
+  doi     = {10.1088/1748-9326/ad2737}
+}
+
+@article{Hersbach2020ERA5,
+  author  = {Hersbach, Hans and others},
+  title   = {The ERA5 global reanalysis},
+  journal = {Quarterly Journal of the Royal Meteorological Society},
+  year    = {2020},
+  volume  = {146},
+  number  = {730},
+  pages   = {1999--2049},
+  doi     = {10.1002/qj.3803}
+}
+
+@article{Lavers2022ERA5precipitation,
+  author  = {Lavers, David A. and Simmons, Adrian and Vamborg, Freja and Rodwell, Mark J.},
+  title   = {An evaluation of ERA5 precipitation for climate monitoring},
+  journal = {Quarterly Journal of the Royal Meteorological Society},
+  year    = {2022},
+  volume  = {148},
+  number  = {748},
+  pages   = {3152--3165},
+  doi     = {10.1002/qj.4351}
+}
+
+@article{terblanche2022era5,
+  author  = {Terblanche, Deon and Lynch, Amanda and Chen, Zihan and Sinclair, Scott},
+  title   = {ERA5-Derived Precipitation: Insights from Historical Rainfall Networks in Southern Africa},
+  journal = {Journal of Applied Meteorology and Climatology},
+  year    = {2022},
+  volume  = {61},
+  number  = {10},
+  pages   = {1473--1484},
+  doi     = {10.1175/JAMC-D-21-0096.1}
+}
+
+@article{Lai2020arima,
+  author  = {Lai, Yuchuan and Dzombak, David A.},
+  title   = {Use of the Autoregressive Integrated Moving Average Model to Forecast Near-Term Regional Temperature and Precipitation},
+  journal = {Weather and Forecasting},
+  year    = {2020},
+  volume  = {35},
+  number  = {3},
+  pages   = {959--976},
+  doi     = {10.1175/WAF-D-19-0158.1}
+}
+
+@article{mulla2024sarimax,
+  author  = {Mulla, Shahenaz and Pande, Chaitanya B. and Singh, Sudhir K.},
+  title   = {Time Series Forecasting of Monthly Rainfall using SARIMAX Model},
+  journal = {Water Resources Management},
+  year    = {2024},
+  volume  = {38},
+  number  = {6},
+  pages   = {1825--1846},
+  doi     = {10.1007/s11269-024-03756-5}
+}
+
+@article{unnikrishnan2020hybrid,
+  author  = {Unnikrishnan, Poornima and Jothiprakash, V.},
+  title   = {Hybrid SSA-ARIMA-ANN Model for Forecasting Daily Rainfall},
+  journal = {Water Resources Management},
+  year    = {2020},
+  volume  = {34},
+  number  = {11},
+  pages   = {3609--3623},
+  doi     = {10.1007/s11269-020-02638-w}
+}
+
+@article{Breiman2001RF,
+  author  = {Breiman, Leo},
+  title   = {Random Forests},
+  journal = {Machine Learning},
+  year    = {2001},
+  volume  = {45},
+  number  = {1},
+  pages   = {5--32},
+  doi     = {10.1023/A:1010933404324}
+}
+
+@article{Wang2021TropicalRainfall,
+  author  = {Wang, Jiayi and Wong, Raymond K. W. and Jun, Mikyoung and others},
+  title   = {Statistical and Machine Learning Methods Applied to the Prediction of Different Tropical Rainfall Types},
+  journal = {Environmental Research Communications},
+  year    = {2021},
+  volume  = {3},
+  number  = {11},
+  pages   = {111001},
+  doi     = {10.1088/2515-7620/ac371f}
+}
+
+@article{Grazzini2024PrecipitationExtremes,
+  author  = {Grazzini, Federico and others},
+  title   = {Improving forecasts of precipitation extremes over northern and central Italy using machine learning},
+  journal = {Quarterly Journal of the Royal Meteorological Society},
+  year    = {2024},
+  volume  = {150},
+  number  = {762},
+  pages   = {3167--3181},
+  doi     = {10.1002/qj.4755}
+}
+
+@inproceedings{TihiPopov2024ARIMARF,
+  author    = {Tihi, Ninoslava and Popov, Srdan},
+  title     = {A Comparison of Arima and Random Forest Time Series Models for Urban Drought Prediction},
+  booktitle = {Proceedings of the International Scientific Conference -- Sinteza 2024},
+  year      = {2024},
+  pages     = {51--56},
+  doi       = {10.15308/Sinteza-2024-51-56}
+}
+
+@article{Khan2024Rainfall,
+  author  = {Khan, Mohd Usman Saeed and others},
+  title   = {Comparative analysis of different rainfall prediction models: A case study of Aligarh City, India},
+  journal = {Results in Engineering},
+  year    = {2024},
+  volume  = {23},
+  pages   = {102093},
+  doi     = {10.1016/j.rineng.2024.102093}
+}
+
+@article{Casati2008ForecastVerification,
+  author  = {Casati, B. and others},
+  title   = {Forecast verification: Current status and future directions},
+  journal = {Meteorological Applications},
+  year    = {2008},
+  volume  = {15},
+  number  = {1},
+  pages   = {3--18},
+  doi     = {10.1002/met.52}
+}
+
+@article{Bouttier2024RiskThresholds,
+  author  = {Bouttier, François and Marchal, Hugo},
+  title   = {Probabilistic short-range forecasts of high-precipitation events: Optimal decision thresholds and predictability limits},
+  journal = {Natural Hazards and Earth System Sciences},
+  year    = {2024},
+  volume  = {24},
+  number  = {8},
+  pages   = {2793--2816},
+  doi     = {10.5194/nhess-24-2793-2024}
+}
+
+
+@book{hyndman2021forecasting,
+  author    = {Hyndman, Rob J. and Athanasopoulos, George},
+  title     = {Forecasting: Principles and Practice},
+  edition   = {3},
+  year      = {2021},
+  publisher = {OTexts},
+  address   = {Melbourne, Australia},
+  url       = {https://otexts.com/fpp3/}
+}
+
+@article{makridakis1993accuracy,
+  author  = {Makridakis, Spyros and Andersen, Arthur and Carbone, Robert and
+             Fildes, Robert and Hibon, Michele and Lewandowski, Roger and
+             Newton, Mark and Parzen, Emanuel and Winkler, Robert},
+  title   = {The M3-Competition: Results, Conclusions and Implications},
+  journal = {International Journal of Forecasting},
+  volume  = {9},
+  number  = {1},
+  pages   = {105--116},
+  year    = {1993}
+}
