@@ -1,7 +1,7 @@
 # Previsão da Precipitação e Classificação do Risco Pluviométrico na Província de Maputo
 
 Comparação entre SARIMAX, Random Forest e XGBoost na previsão da precipitação diária e na classificação do risco pluviométrico, com dados ERA5 (1995–2024, 10.957 observações diárias).
-
+[![DOI](https://zenodo.org/badge/1434180217.svg)](https://doi.org/10.5281/zenodo.23662484)
 [Ler o preprint (PDF)](Previsao-Precipitacao-Maputo.pdf)
 
 **Autor:** Gaio Cotane Joao Magaia, DARTA'ACOS, Maputo, Moçambique
